@@ -1,0 +1,20 @@
+[project]
+name = "011-place-multiple-orders-fyers"
+version = "0.1.0"
+description = "Multi-account Fyers trading terminal with FastAPI"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "sqlalchemy[asyncio]",
+    "asyncpg",
+    "psycopg2-binary",
+    "pydantic",
+    "fyers-apiv3",
+    "requests",
+    "aiosqlite",
+]
+
+[project.scripts]
+serve = "main:app"

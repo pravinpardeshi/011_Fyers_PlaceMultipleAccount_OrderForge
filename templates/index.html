@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fyers Multi-Account Terminal</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <h2>Fyers Terminal</h2>
+                <span class="subtitle">Multi-Account Trading Platform</span>
+            </div>
+            <ul class="nav-links">
+                <li class="active" data-tab="terminal">
+                    <span class="icon">&#9881;</span> <span class="nav-text">Trading Terminal</span>
+                </li>
+                <li data-tab="accounts">
+                    <span class="icon">&#128100;</span> <span class="nav-text">Accounts</span>
+                </li>
+                <li data-tab="tokens">
+                    <span class="icon">&#128273;</span> <span class="nav-text">Token Management</span>
+                </li>
+                <li data-tab="history">
+                    <span class="icon">&#128203;</span> <span class="nav-text">Order History</span>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Minimize sidebar">
+                    <span class="toggle-icon">&#10094;</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <div class="status-left">
+                    <span id="connectionStatus" class="status-dot green"></span>
+                    <span>Server Connected</span>
+                </div>
+                <div class="status-right">
+                    <span id="activeAccountCount">0 Active Accounts</span>
+                    <span class="separator">|</span>
+                    <span id="validTokenCount">0 Valid Tokens</span>
+                    <span class="separator">|</span>
+                    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark theme">
+                        <span id="themeIcon">&#9790;</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Trading Terminal Tab -->
+            <div id="tab-terminal" class="tab-content active">
+                <div class="terminal-layout">
+                    <div class="order-form-card">
+                        <h3>Place Order</h3>
+                        <div class="form-group">
+                            <label for="symbol">Symbol</label>
+                            <input type="text" id="symbol" placeholder="NSE:SBIN-EQ" value="NSE:SBIN-EQ">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="qty">Quantity</label>
+                                <input type="number" id="qty" value="1" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="productType">Product</label>
+                                <select id="productType">
+                                    <option value="INTRADAY">INTRADAY</option>
+                                    <option value="CNC">CNC (Delivery)</option>
+                                    <option value="MARGIN">MARGIN</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="orderType">Order Type</label>
+                                <select id="orderType">
+                                    <option value="2">Market</option>
+                                    <option value="1">Limit</option>
+                                    <option value="3">SL-Limit</option>
+                                    <option value="4">SL-Market</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="limitPriceGroup">
+                                <label for="limitPrice">Limit Price</label>
+                                <input type="number" id="limitPrice" value="0" step="0.05">
+                            </div>
+                        </div>
+                        <div class="order-buttons">
+                            <button class="btn btn-buy" onclick="placeOrder(1)">BUY</button>
+                            <button class="btn btn-sell" onclick="placeOrder(-1)">SELL</button>
+                        </div>
+                    </div>
+
+                    <div class="execution-log-card">
+                        <h3>Execution Log</h3>
+                        <div id="executionLog" class="execution-log">
+                            <div class="log-empty">Place an order to see results here</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Accounts Tab -->
+            <div id="tab-accounts" class="tab-content">
+                <div class="tab-header">
+                    <h3>Manage Accounts</h3>
+                    <button class="btn btn-primary" onclick="showAccountForm()">+ Add Account</button>
+                </div>
+
+                <!-- Account Form Modal -->
+                <div id="accountFormModal" class="modal hidden">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 id="accountFormTitle">Add Account</h3>
+                            <button class="modal-close" onclick="hideAccountForm()">&times;</button>
+                        </div>
+                        <form id="accountForm" onsubmit="submitAccount(event)">
+                            <input type="hidden" id="accountId">
+                            <div class="form-group">
+                                <label for="accName">Account Name</label>
+                                <input type="text" id="accName" placeholder="Primary Account" required>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="accUsername">Fyers Username</label>
+                                    <input type="text" id="accUsername" placeholder="TK01248" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="accPin">PIN</label>
+                                    <input type="password" id="accPin" placeholder="1234" maxlength="10" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="accClientId">Client ID (App ID)</label>
+                                    <input type="text" id="accClientId" placeholder="L9NY305RTW-100" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="accSecretKey">Secret Key</label>
+                                    <input type="password" id="accSecretKey" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="accTotpKey">TOTP Key</label>
+                                <input type="password" id="accTotpKey" placeholder="OMKRABCDCDVDFGECLWXK6OVB7T4DTKU5" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="accRedirectUri">Redirect URI</label>
+                                <input type="text" id="accRedirectUri" value="https://trade.fyers.in/api-login/redirect-uri/index.html">
+                            </div>
+                            <div class="form-buttons">
+                                <button type="submit" class="btn btn-primary">Save Account</button>
+                                <button type="button" class="btn btn-secondary" onclick="hideAccountForm()">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="accountsList" class="accounts-grid"></div>
+            </div>
+
+            <!-- Token Management Tab -->
+            <div id="tab-tokens" class="tab-content">
+                <div class="tab-header">
+                    <h3>Token Management</h3>
+                    <button class="btn btn-primary" onclick="generateAllTokens()">Generate All Tokens</button>
+                </div>
+                <div id="tokenStatusList" class="token-grid"></div>
+            </div>
+
+            <!-- Order History Tab -->
+            <div id="tab-history" class="tab-content">
+                <div class="tab-header">
+                    <h3>Order History</h3>
+                    <button class="btn btn-secondary" onclick="loadOrderHistory()">Refresh</button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table" id="orderHistoryTable">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Account</th>
+                                <th>Symbol</th>
+                                <th>Side</th>
+                                <th>Qty</th>
+                                <th>Type</th>
+                                <th>Product</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderHistoryBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

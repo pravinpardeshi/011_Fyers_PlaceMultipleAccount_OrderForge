@@ -1,0 +1,47 @@
+# ─── Python ────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+dist/
+build/
+*.whl
+
+# ─── Virtual environments ──────────────────────────────────
+.venv/
+venv/
+ENV/
+
+# ─── uv ────────────────────────────────────────────────────
+uv.lock
+
+# ─── SQLite databases ─────────────────────────────────────
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# ─── Fyers tokens (sensitive) ─────────────────────────────
+.fyers_token.txt
+*.token
+
+# ─── IDE / Editor ──────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ─── Environment / secrets ────────────────────────────────
+.env
+.env.*
+
+# ─── Logs ──────────────────────────────────────────────────
+*.log
+
+# ─── OS ────────────────────────────────────────────────────
+.DS_Store
+Desktop.ini
