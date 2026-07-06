@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
+import asyncio
 import logging
 
 from fastapi import FastAPI
@@ -9,6 +10,7 @@ from fastapi.responses import FileResponse
 
 from database import init_db
 from routers import accounts_router, tokens_router, orders_router
+from token_scheduler import scheduler_loop
 
 logging.basicConfig(
     level=logging.INFO,
@@ -19,7 +21,13 @@ logging.basicConfig(
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
+    task = asyncio.create_task(scheduler_loop())
     yield
+    task.cancel()
+    try:
+        await task
+    except asyncio.CancelledError:
+        pass
 
 
 app = FastAPI(

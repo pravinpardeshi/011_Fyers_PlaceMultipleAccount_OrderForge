@@ -190,8 +190,12 @@
             <div id="tab-tokens" class="tab-content">
                 <div class="tab-header">
                     <h3>Token Management</h3>
-                    <button class="btn btn-primary" onclick="generateAllTokens()">Generate All Tokens</button>
+                    <div style="display:flex;gap:8px;">
+                        <button class="btn btn-secondary" onclick="refreshExpiringTokens()">Refresh Expiring</button>
+                        <button class="btn btn-primary" onclick="generateAllTokens()">Generate All Tokens</button>
+                    </div>
                 </div>
+                <div id="schedulerStatus" class="scheduler-info"></div>
                 <div id="tokenStatusList" class="token-grid"></div>
             </div>
 

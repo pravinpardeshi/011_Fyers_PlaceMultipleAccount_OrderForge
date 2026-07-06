@@ -11,6 +11,7 @@ from database import get_db
 from models import Account
 from schemas import TokenGenerateRequest, TokenStatus
 from fyers_client import generate_access_token
+from token_scheduler import get_scheduler_status, check_and_refresh_tokens
 
 logger = logging.getLogger(__name__)
 
@@ -91,3 +92,14 @@ async def token_status(db: AsyncSession = Depends(get_db)):
         ))
 
     return statuses
+
+
+@router.get("/scheduler")
+async def scheduler_status():
+    return await get_scheduler_status()
+
+
+@router.post("/refresh")
+async def refresh_expiring_tokens():
+    results = await check_and_refresh_tokens()
+    return {"message": f"Refreshed {len(results)} accounts", "results": results}

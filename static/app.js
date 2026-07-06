@@ -321,6 +321,7 @@ async function loadTokenStatus() {
         }).join('');
 
         document.getElementById('validTokenCount').textContent = `${validCount} Valid Tokens`;
+        loadSchedulerStatus();
     } catch (err) {
         toast(err.message, 'error');
     }
@@ -344,6 +345,45 @@ async function generateAllTokens() {
     } finally {
         btn.disabled = false;
         btn.textContent = 'Generate All Tokens';
+    }
+}
+
+async function refreshExpiringTokens() {
+    const btn = event.target;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Refreshing...';
+
+    try {
+        const resp = await api('/api/v1/tokens/refresh', 'POST');
+        if (resp.results.length === 0) {
+            toast('All tokens are valid, no refresh needed', 'success');
+        } else {
+            let successCount = resp.results.filter(r => r.success).length;
+            toast(`Refreshed: ${successCount}/${resp.results.length} succeeded`, successCount === resp.results.length ? 'success' : 'error');
+        }
+        loadTokenStatus();
+    } catch (err) {
+        toast(err.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Refresh Expiring';
+    }
+}
+
+async function loadSchedulerStatus() {
+    try {
+        const status = await api('/api/v1/tokens/scheduler');
+        const el = document.getElementById('schedulerStatus');
+        const accountsNeedingRefresh = status.accounts.filter(a => a.needs_refresh).length;
+        el.innerHTML = `
+            <div class="scheduler-info-box">
+                <span>Auto-check every ${status.check_interval_minutes} min</span>
+                <span>Refresh ${status.refresh_before_expiry_hours}h before expiry</span>
+                <span>${accountsNeedingRefresh} account(s) need refresh</span>
+            </div>
+        `;
+    } catch (err) {
+        // silently fail
     }
 }
 

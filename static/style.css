@@ -487,6 +487,21 @@ body {
 }
 
 /* Token Grid */
+.scheduler-info {
+    margin-bottom: 18px;
+}
+
+.scheduler-info-box {
+    display: flex;
+    gap: 24px;
+    padding: 12px 18px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
 .token-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
