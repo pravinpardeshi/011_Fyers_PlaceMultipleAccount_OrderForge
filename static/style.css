@@ -45,11 +45,12 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
     background: var(--bg-primary);
     color: var(--text-primary);
     min-height: 100vh;
-    font-size: 15px;
+    font-size: 18px;
+    line-height: 1.5;
 }
 
 .app {
@@ -59,7 +60,7 @@ body {
 
 /* Sidebar */
 .sidebar {
-    width: 260px;
+    width: 265px;
     background: var(--bg-secondary);
     border-right: 1px solid var(--border);
     padding: 20px 0;
@@ -78,14 +79,15 @@ body {
 }
 
 .sidebar-brand h2 {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 700;
     color: var(--accent-blue);
 }
 
 .sidebar-brand .subtitle {
-    font-size: 14px;
+    font-size: 15px;
     color: var(--text-muted);
+    text-align: center;
 }
 
 .nav-links {
@@ -97,7 +99,7 @@ body {
     padding: 14px 20px;
     cursor: pointer;
     color: var(--text-secondary);
-    font-size: 17px;
+    font-size: 19px;
     transition: all 0.2s;
     display: flex;
     align-items: center;
@@ -117,7 +119,7 @@ body {
     border-right: 3px solid var(--accent-blue);
 }
 
-.icon { font-size: 20px; flex-shrink: 0; }
+.icon { font-size: 22px; flex-shrink: 0; }
 
 .sidebar-footer {
     border-top: 1px solid var(--border);
@@ -194,7 +196,7 @@ body {
     padding: 14px 28px;
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border);
-    font-size: 16px;
+    font-size: 18px;
     color: var(--text-secondary);
 }
 
@@ -235,7 +237,7 @@ body {
 }
 
 .tab-header h3 {
-    font-size: 24px;
+    font-size: 26px;
     font-weight: 600;
 }
 
@@ -255,9 +257,9 @@ body {
 
 .btn-primary { background: var(--accent-blue); color: white; }
 .btn-secondary { background: var(--border-light); color: var(--text-primary); }
-.btn-buy { background: var(--accent-green); color: white; width: 100%; padding: 14px; font-size: 18px; }
-.btn-sell { background: var(--accent-red); color: white; width: 100%; padding: 14px; font-size: 18px; }
-.btn-sm { padding: 7px 14px; font-size: 13px; }
+.btn-buy { background: var(--accent-green); color: white; width: 100%; padding: 14px; font-size: 20px; }
+.btn-sell { background: var(--accent-red); color: white; width: 100%; padding: 14px; font-size: 20px; }
+.btn-sm { padding: 8px 16px; font-size: 16px; }
 .btn-danger { background: var(--accent-red); color: white; }
 
 /* Forms */
@@ -269,7 +271,7 @@ body {
 .form-group label {
     display: block;
     margin-bottom: 7px;
-    font-size: 14px;
+    font-size: 17px;
     color: var(--text-secondary);
     font-weight: 500;
 }
@@ -277,12 +279,12 @@ body {
 .form-group input,
 .form-group select {
     width: 100%;
-    padding: 11px 13px;
+    padding: 12px 14px;
     background: var(--bg-input);
     border: 1px solid var(--border);
     border-radius: 6px;
     color: var(--text-primary);
-    font-size: 15px;
+    font-size: 18px;
 }
 
 .form-group input:focus,
@@ -317,7 +319,7 @@ body {
 
 .account-select-loading {
     color: var(--text-muted);
-    font-size: 13px;
+    font-size: 16px;
     text-align: center;
     padding: 8px 0;
 }
@@ -345,12 +347,12 @@ body {
 }
 
 .account-checkbox-label {
-    font-size: 14px;
+    font-size: 17px;
     color: var(--text-primary);
 }
 
 .account-checkbox-id {
-    font-size: 12px;
+    font-size: 15px;
     color: var(--text-muted);
     margin-left: auto;
 }
@@ -373,7 +375,7 @@ body {
 
 .order-form-card h3 {
     margin-bottom: 22px;
-    font-size: 18px;
+    font-size: 20px;
     color: var(--text-secondary);
 }
 
@@ -388,7 +390,7 @@ body {
 
 .execution-log-card h3 {
     margin-bottom: 16px;
-    font-size: 18px;
+    font-size: 20px;
     color: var(--text-secondary);
 }
 
@@ -399,7 +401,7 @@ body {
     border-radius: 6px;
     padding: 18px;
     font-family: 'Consolas', 'Monaco', monospace;
-    font-size: 14px;
+    font-size: 17px;
     line-height: 1.7;
 }
 
@@ -418,7 +420,7 @@ body {
 
 .log-time {
     color: var(--text-muted);
-    font-size: 12px;
+    font-size: 15px;
 }
 
 .log-account {
@@ -456,14 +458,14 @@ body {
 }
 
 .account-card-header h4 {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
 }
 
 .account-badge {
     padding: 4px 12px;
     border-radius: 12px;
-    font-size: 12px;
+    font-size: 15px;
     font-weight: 600;
 }
 
@@ -474,7 +476,7 @@ body {
     display: flex;
     justify-content: space-between;
     padding: 7px 0;
-    font-size: 14px;
+    font-size: 17px;
     color: var(--text-secondary);
 }
 
@@ -498,7 +500,7 @@ body {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 8px;
-    font-size: 13px;
+    font-size: 16px;
     color: var(--text-secondary);
 }
 
@@ -531,7 +533,7 @@ body {
 }
 
 .token-card-detail {
-    font-size: 14px;
+    font-size: 17px;
     color: var(--text-secondary);
     padding: 5px 0;
 }
@@ -547,7 +549,7 @@ body {
 .data-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px;
+    font-size: 17px;
 }
 
 .data-table th {
@@ -574,7 +576,7 @@ body {
 .status-badge {
     padding: 4px 12px;
     border-radius: 12px;
-    font-size: 12px;
+    font-size: 15px;
     font-weight: 600;
 }
 
@@ -619,13 +621,13 @@ body {
     margin-bottom: 22px;
 }
 
-.modal-header h3 { font-size: 22px; }
+.modal-header h3 { font-size: 24px; }
 
 .modal-close {
     background: none;
     border: none;
     color: var(--text-muted);
-    font-size: 28px;
+    font-size: 30px;
     cursor: pointer;
 }
 
@@ -665,7 +667,7 @@ body {
     border-radius: 6px;
     padding: 6px 14px;
     cursor: pointer;
-    font-size: 20px;
+    font-size: 22px;
     line-height: 1;
     transition: all 0.2s;
     color: var(--text-primary);
@@ -674,4 +676,247 @@ body {
 .theme-toggle:hover {
     border-color: var(--accent-blue);
     background: var(--bg-card);
+}
+
+/* Health Check */
+.health-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 18px;
+}
+
+.health-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px;
+    border-left: 4px solid var(--border);
+}
+
+.health-card.health-ok { border-left-color: var(--accent-green); }
+.health-card.health-warn { border-left-color: var(--accent-yellow); }
+.health-card.health-error { border-left-color: var(--accent-red); }
+
+.health-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.health-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.health-badge.health-ok { background: rgba(16,185,129,0.15); color: var(--accent-green); }
+.health-badge.health-warn { background: rgba(245,158,11,0.15); color: var(--accent-yellow); }
+.health-badge.health-error { background: rgba(239,68,68,0.15); color: var(--accent-red); }
+
+.health-card-detail {
+    font-size: 16px;
+    color: var(--text-secondary);
+    padding: 4px 0;
+}
+
+/* ─── Mobile Responsive ─── */
+@media (max-width: 768px) {
+    body {
+        font-size: 16px;
+    }
+
+    .app {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 0;
+    }
+
+    .sidebar-brand {
+        display: none;
+    }
+
+    .nav-links {
+        display: flex;
+        flex-direction: row;
+        flex: 1;
+        overflow-x: auto;
+    }
+
+    .nav-links li {
+        padding: 14px 16px;
+        font-size: 15px;
+        white-space: nowrap;
+        border-right: none;
+        border-bottom: 3px solid transparent;
+    }
+
+    .nav-links li.active {
+        border-right: none;
+        border-bottom: 3px solid var(--accent-blue);
+    }
+
+    .sidebar-footer {
+        display: none;
+    }
+
+    .sidebar-toggle {
+        display: none;
+    }
+
+    .content {
+        width: 100%;
+    }
+
+    .status-bar {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+
+    .status-left, .status-right {
+        gap: 8px;
+    }
+
+    .separator {
+        display: none;
+    }
+
+    .tab-content {
+        padding: 16px;
+    }
+
+    .tab-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .tab-header h3 {
+        font-size: 22px;
+    }
+
+    .terminal-layout {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+
+    .order-form-card {
+        padding: 16px;
+    }
+
+    .execution-log-card {
+        padding: 16px;
+        min-height: 300px;
+    }
+
+    .execution-log {
+        font-size: 14px;
+        padding: 12px;
+    }
+
+    .form-row {
+        flex-direction: column;
+    }
+
+    .order-buttons {
+        flex-direction: column;
+    }
+
+    .btn-buy, .btn-sell {
+        width: 100%;
+    }
+
+    .accounts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .token-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .health-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .scheduler-info-box {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .table-container {
+        font-size: 14px;
+    }
+
+    .data-table {
+        font-size: 14px;
+    }
+
+    .data-table th, .data-table td {
+        padding: 10px 12px;
+    }
+
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+        margin: 10px;
+    }
+
+    .account-card {
+        padding: 16px;
+    }
+
+    .token-card {
+        padding: 16px;
+    }
+
+    .health-card {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        font-size: 15px;
+    }
+
+    .nav-links li {
+        padding: 12px 12px;
+        font-size: 14px;
+    }
+
+    .icon {
+        font-size: 18px;
+    }
+
+    .tab-content {
+        padding: 12px;
+    }
+
+    .form-group label {
+        font-size: 15px;
+    }
+
+    .form-group input, .form-group select {
+        font-size: 16px;
+        padding: 10px 12px;
+    }
+
+    .btn-buy, .btn-sell {
+        font-size: 18px;
+        padding: 12px;
+    }
+
+    .status-bar {
+        font-size: 13px;
+    }
 }

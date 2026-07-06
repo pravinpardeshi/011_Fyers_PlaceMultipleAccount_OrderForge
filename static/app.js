@@ -50,6 +50,7 @@ document.querySelectorAll('.nav-links li').forEach(tab => {
         if (tab.dataset.tab === 'accounts') loadAccounts();
         if (tab.dataset.tab === 'tokens') loadTokenStatus();
         if (tab.dataset.tab === 'history') loadOrderHistory();
+        if (tab.dataset.tab === 'health') loadHealthCheck();
     });
 });
 
@@ -416,6 +417,51 @@ async function loadOrderHistory() {
                 </tr>
             `;
         }).join('');
+    } catch (err) {
+        toast(err.message, 'error');
+    }
+}
+
+async function loadHealthCheck() {
+    try {
+        const health = await api('/health');
+        const container = document.getElementById('healthStatus');
+
+        const statusClass = health.status === 'healthy' ? 'health-ok' : health.status === 'degraded' ? 'health-warn' : 'health-error';
+
+        let html = `
+            <div class="health-card ${statusClass}">
+                <div class="health-card-header">
+                    <strong>Overall Status</strong>
+                    <span class="health-badge ${statusClass}">${health.status.toUpperCase()}</span>
+                </div>
+                <div class="health-card-detail">Version: ${health.version}</div>
+                <div class="health-card-detail">Timestamp: ${new Date(health.timestamp).toLocaleString()}</div>
+            </div>
+        `;
+
+        for (const [name, check] of Object.entries(health.checks)) {
+            const checkClass = check.status === 'ok' ? 'health-ok' : 'health-error';
+            let details = '';
+            if (name === 'database') {
+                details = check.status === 'ok' ? 'Connection OK' : check.detail;
+            } else if (name === 'scheduler') {
+                details = `Check every ${check.check_interval_minutes} min | ${check.valid_tokens}/${check.total_accounts} valid tokens`;
+            } else if (name === 'accounts') {
+                details = `${check.active} active / ${check.total} total`;
+            }
+            html += `
+                <div class="health-card ${checkClass}">
+                    <div class="health-card-header">
+                        <strong>${name.charAt(0).toUpperCase() + name.slice(1)}</strong>
+                        <span class="health-badge ${checkClass}">${check.status.toUpperCase()}</span>
+                    </div>
+                    <div class="health-card-detail">${details}</div>
+                </div>
+            `;
+        }
+
+        container.innerHTML = html;
     } catch (err) {
         toast(err.message, 'error');
     }
