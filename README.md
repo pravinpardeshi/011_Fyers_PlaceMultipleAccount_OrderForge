@@ -216,10 +216,10 @@ PORT = 8000
 
 ```
 ┌─────────────────┐     ┌──────────────────────────┐
-│   Browser UI    │────▶│      FastAPI Backend      │
-│  (index.html)   │◀────│  /api/v1/orders/place     │
-└─────────────────┘     │  /api/v1/tokens/generate  │
-                        │  /api/v1/accounts         │
+│   Browser UI    │────▶│      FastAPI Backend     │
+│  (index.html)   │◀────│  /api/v1/orders/place    │
+└─────────────────┘     │  /api/v1/tokens/generate │
+                        │  /api/v1/accounts        │
                         └──────────┬───────────────┘
                                    │
                     ┌──────────────┼──────────────┐
