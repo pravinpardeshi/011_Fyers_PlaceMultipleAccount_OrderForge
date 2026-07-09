@@ -26,6 +26,7 @@ Built with **FastAPI**, **Fyers API V3**, **SQLAlchemy** (SQLite / PostgreSQL), 
 - **Health check endpoint** — `/health` for monitoring DB, scheduler, and account status
 - **Token Status in Health Check** — per-account token validity at a glance
 - **Full order history** — every order tracked with batch grouping and API responses
+- **Server Connection Status** — real-time indicator in the status bar; polls the backend every 10s and shows green ("Server Connected") or red ("Server Disconnected")
 - **Montserrat font** — clean, modern UI typography
 
 ---
@@ -190,6 +191,8 @@ The **Health Check** tab shows:
 - Account counts
 - Per-account token validity (Token Status card)
 
+The **status bar** at the top of the UI continuously monitors backend connectivity. It polls the server every 10 seconds and displays a green dot with "Server Connected" when reachable, or a red dot with "Server Disconnected" when the backend is down.
+
 ---
 
 ## API Endpoints
@@ -207,6 +210,7 @@ The **Health Check** tab shows:
 | `POST` | `/api/v1/tokens/refresh` | Manual token refresh |
 | `POST` | `/api/v1/orders/place` | Place order across selected accounts |
 | `GET` | `/api/v1/orders/history` | Order history with optional `batch_id` filter |
+| `GET` | `/api/v1/config` | Frontend config (connection poll interval) |
 | `GET` | `/health` | Health check (DB, scheduler, accounts, tokens) |
 
 Interactive API docs available at **http://localhost:8000/docs**.
@@ -278,6 +282,7 @@ PORT = 8000
 - **Token Scheduler**: Background task checks every 30 minutes, refreshes tokens expiring within 1 hour
 - **Order Placement**: Dispatched in parallel using `ThreadPoolExecutor` for near-simultaneous execution
 - **Smart Form**: Automatically toggles between Quantity (equity) and Lots (F&O) based on product selection
+- **Connection Monitoring**: Frontend polls `/api/v1/accounts` at a configurable interval (default 10s) to detect backend reachability and update the status bar in real time
 
 ---
 
