@@ -105,7 +105,7 @@ body {
 }
 
 .nav-links li {
-    padding: 14px 20px;
+    padding: 8px 20px;
     cursor: pointer;
     color: var(--text-secondary);
     font-size: 19px;
@@ -129,6 +129,65 @@ body {
 }
 
 .icon { font-size: 22px; flex-shrink: 0; }
+
+.nav-parent {
+    position: relative;
+    flex-wrap: wrap;
+}
+
+.nav-parent > .nav-text,
+.nav-parent > .icon,
+.nav-parent > .nav-arrow {
+    flex-shrink: 0;
+}
+
+.nav-arrow {
+    font-size: 20px;
+    margin-left: auto;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+}
+
+.nav-parent.open > .nav-arrow {
+    transform: rotate(180deg);
+}
+
+.nav-submenu {
+    list-style: none;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease;
+    padding-left: 0;
+    width: 100%;
+    display: block;
+}
+
+.nav-parent.open > .nav-submenu {
+    max-height: 200px;
+}
+
+.nav-submenu li {
+    padding: 6px 20px 6px 54px;
+    font-size: 16px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    border-right: none;
+    display: block;
+    width: 100%;
+    white-space: nowrap;
+}
+
+.nav-submenu li:hover {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--text-primary);
+}
+
+.nav-submenu li.active {
+    color: var(--accent-blue);
+    border-right: none;
+    background: rgba(59, 130, 246, 0.1);
+}
 
 .sidebar-footer {
     border-top: 1px solid #000000;
@@ -182,10 +241,40 @@ body {
 }
 
 .sidebar.collapsed .nav-links li {
-    padding: 14px 0;
+    padding: 8px 0;
     justify-content: center;
     position: relative;
     overflow: visible;
+}
+
+.sidebar.collapsed .nav-parent .nav-arrow {
+    display: none;
+}
+
+.sidebar.collapsed .nav-submenu {
+    display: none;
+}
+
+.sidebar.collapsed .nav-parent.open .nav-submenu {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 100%;
+    margin-left: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 0 0 6px 6px;
+    padding: 6px 0;
+    min-width: 100%;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    max-height: 200px;
+}
+
+.sidebar.collapsed .nav-parent.open .nav-submenu li {
+    padding: 8px 16px;
+    justify-content: flex-start;
+    white-space: nowrap;
 }
 
 .sidebar.collapsed .nav-links li:hover {
@@ -264,6 +353,10 @@ body {
     line-height: 1.2;
 }
 
+#databaseType {
+    color: var(--accent-blue);
+}
+
 .status-dot {
     width: 12px;
     height: 12px;
@@ -275,12 +368,21 @@ body {
 .status-dot.red { background: var(--accent-red); }
 .status-dot.yellow { background: var(--accent-yellow); }
 
+.status-left.disconnected {
+    animation: pulse-disconnect 0.5s ease-in-out infinite;
+}
+
+@keyframes pulse-disconnect {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
 .separator { color: var(--border-light); }
 
 /* Tabs */
 .tab-content {
     display: none;
-    padding: 28px;
+    padding: 20px;
     flex: 1;
     overflow-y: auto;
 }
@@ -315,21 +417,21 @@ body {
 
 .btn-primary { background: var(--accent-blue); color: white; }
 .btn-secondary { background: var(--border-light); color: var(--text-primary); }
-.btn-buy { background: var(--accent-green); color: white; width: 100%; padding: 14px; font-size: 20px; }
-.btn-sell { background: var(--accent-red); color: white; width: 100%; padding: 14px; font-size: 20px; }
+.btn-buy { background: var(--accent-green); color: white; width: 100%; padding: 12px; font-size: 18px; }
+.btn-sell { background: var(--accent-red); color: white; width: 100%; padding: 12px; font-size: 18px; }
 .btn-sm { padding: 8px 16px; font-size: 16px; }
 .btn-danger { background: var(--accent-red); color: white; }
 
 /* Forms */
 .form-group {
-    margin-bottom: 18px;
+    margin-bottom: 12px;
     flex: 1;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 7px;
-    font-size: 17px;
+    margin-bottom: 5px;
+    font-size: 16px;
     color: var(--text-secondary);
     font-weight: 500;
 }
@@ -337,18 +439,24 @@ body {
 .form-group input,
 .form-group select {
     width: 100%;
-    padding: 12px 14px;
+    padding: 9px 12px;
     background: var(--bg-input);
     border: 1px solid var(--border);
     border-radius: 6px;
     color: var(--text-primary);
-    font-size: 18px;
+    font-size: 16px;
 }
 
 .form-group input:focus,
 .form-group select:focus {
     outline: none;
     border-color: var(--accent-blue);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: var(--text-muted) !important;
+    opacity: 1;
 }
 
 .info-icon {
@@ -418,13 +526,13 @@ body {
 
 .form-row {
     display: flex;
-    gap: 16px;
+    gap: 14px;
 }
 
 .order-buttons {
     display: flex;
     gap: 12px;
-    margin-top: 24px;
+    margin-top: 16px;
 }
 
 /* Account Select Checkboxes */
@@ -435,8 +543,8 @@ body {
     background: var(--bg-input);
     border: 1px solid var(--border);
     border-radius: 6px;
-    padding: 10px 12px;
-    max-height: 150px;
+    padding: 8px 10px;
+    max-height: 120px;
     overflow-y: auto;
 }
 
@@ -528,7 +636,7 @@ body {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 10px;
-    padding: 28px;
+    padding: 22px;
     height: fit-content;
     overflow-y: auto;
     flex: 1;
@@ -582,7 +690,7 @@ body {
 }
 
 .order-form-card h3 {
-    margin-bottom: 22px;
+    margin-bottom: 16px;
     font-size: 20px;
     color: var(--text-secondary);
 }
@@ -802,6 +910,8 @@ body {
 
 .modal.hidden { display: none; }
 
+.hidden { display: none !important; }
+
 .modal-content {
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -961,6 +1071,26 @@ body {
     .nav-links li.active {
         border-right: none;
         border-bottom: 3px solid var(--accent-blue);
+    }
+
+    .nav-parent.open > .nav-submenu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 0 0 6px 6px;
+        max-height: 200px;
+        z-index: 100;
+        padding-left: 0;
+        width: 100%;
+    }
+
+    .nav-submenu li {
+        padding: 10px 16px 10px 36px;
+        border-bottom: 1px solid var(--border);
+        display: block;
     }
 
     .sidebar-footer {
@@ -1282,4 +1412,92 @@ body {
 
 .about-link-separator {
     color: var(--text-muted);
+}
+
+/* Order Book */
+.order-book-content {
+    overflow-x: auto;
+}
+
+.orderbook-account {
+    margin-bottom: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.orderbook-account-header {
+    padding: 16px 20px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    font-size: 18px;
+}
+
+.orderbook-error {
+    padding: 16px 20px;
+    color: var(--accent-red);
+    font-size: 16px;
+}
+
+.empty-state {
+    color: var(--text-muted);
+    text-align: center;
+    padding: 40px 20px;
+    font-size: 16px;
+}
+
+/* Funds */
+.funds-content {
+    overflow-x: auto;
+}
+
+.funds-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 18px;
+}
+
+.funds-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px;
+}
+
+.funds-card-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 18px;
+}
+
+.funds-category {
+    margin-bottom: 12px;
+}
+
+.funds-category-title {
+    font-size: 14px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.funds-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 16px;
+    color: var(--text-secondary);
+}
+
+.funds-value {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.funds-used {
+    color: var(--accent-yellow);
 }

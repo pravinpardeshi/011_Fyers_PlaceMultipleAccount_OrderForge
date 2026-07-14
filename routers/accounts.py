@@ -1,3 +1,6 @@
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -5,7 +8,8 @@ import uuid
 
 from database import get_db
 from models import Account
-from schemas import AccountCreate, AccountUpdate, AccountResponse
+from schemas import AccountCreate, AccountUpdate, AccountResponse, FundsRequest, FundsResponse, AccountFunds
+from fyers_client import get_funds
 
 router = APIRouter(prefix="/api/v1/accounts", tags=["accounts"])
 
@@ -55,6 +59,12 @@ async def update_account(account_id: uuid.UUID, payload: AccountUpdate, db: Asyn
         raise HTTPException(status_code=404, detail="Account not found")
 
     update_data = payload.model_dump(exclude_unset=True)
+
+    # Clear token if client_id is changing (token is tied to the App ID)
+    if "client_id" in update_data:
+        account.access_token = None
+        account.token_expiry = None
+
     for field, value in update_data.items():
         setattr(account, field, value)
 
@@ -70,3 +80,42 @@ async def delete_account(account_id: uuid.UUID, db: AsyncSession = Depends(get_d
         raise HTTPException(status_code=404, detail="Account not found")
     await db.delete(account)
     await db.commit()
+
+
+@router.post("/funds", response_model=FundsResponse)
+async def fetch_funds(payload: FundsRequest, db: AsyncSession = Depends(get_db)):
+    query = select(Account).where(Account.is_active == True, Account.access_token.isnot(None))
+    if payload.account_ids:
+        query = query.where(Account.id.in_(payload.account_ids))
+    result = await db.execute(query)
+    accounts = result.scalars().all()
+
+    if not accounts:
+        raise HTTPException(status_code=400, detail="No active accounts with valid tokens. Generate tokens first.")
+
+    loop = asyncio.get_running_loop()
+    items = []
+
+    def _fetch_funds(acc):
+        return acc, get_funds(acc)
+
+    with ThreadPoolExecutor(max_workers=len(accounts)) as pool:
+        tasks = [loop.run_in_executor(pool, _fetch_funds, acc) for acc in accounts]
+        completed = await asyncio.gather(*tasks)
+
+    for acc, resp in completed:
+        error = None
+        funds = None
+        if resp.get("s") == "ok":
+            funds = resp.get("fund_limit", resp)
+        else:
+            error = resp.get("message", str(resp))
+
+        items.append(AccountFunds(
+            account_id=acc.id,
+            account_name=acc.name,
+            funds=funds,
+            error=error,
+        ))
+
+    return FundsResponse(accounts=items)

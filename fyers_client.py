@@ -67,9 +67,9 @@ def generate_access_token(account: Account) -> dict:
         }
         payload4 = {
             "fyers_id": account.fyers_username,
-            "app_id": account.client_id[:-4],
+            "app_id": account.client_id.split("-")[0],
             "redirect_uri": account.redirect_uri,
-            "appType": "100",
+            "appType": "200",
             "code_challenge": "",
             "state": "abcdefg",
             "scope": "",
@@ -120,6 +120,30 @@ def create_fyers_client(account: Account):
         is_async=False,
         log_path="",
     )
+
+
+def get_order_book(account: Account) -> dict:
+    """Fetch the order book for a single account."""
+    client = create_fyers_client(account)
+    if not client:
+        return {"s": "error", "message": "No access token available. Generate token first."}
+    try:
+        return client.orderbook()
+    except Exception as e:
+        logger.exception("Order book fetch failed for %s", account.name)
+        return {"s": "error", "message": str(e)}
+
+
+def get_funds(account: Account) -> dict:
+    """Fetch available funds/balance for a single account."""
+    client = create_fyers_client(account)
+    if not client:
+        return {"s": "error", "message": "No access token available. Generate token first."}
+    try:
+        return client.funds()
+    except Exception as e:
+        logger.exception("Funds fetch failed for %s", account.name)
+        return {"s": "error", "message": str(e)}
 
 
 def place_single_order(account: Account, order_data: dict) -> dict:

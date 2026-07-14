@@ -59,7 +59,11 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 @app.get("/api/v1/config")
 async def get_config():
-    return {"connection_poll_interval_ms": config.CONNECTION_POLL_INTERVAL_MS}
+    db_type = "PostgreSQL" if "postgresql" in config.DATABASE_URL else "SQLite"
+    return {
+        "connection_poll_interval_ms": config.CONNECTION_POLL_INTERVAL_MS,
+        "database_type": db_type,
+    }
 
 
 @app.get("/", include_in_schema=False)
@@ -80,7 +84,8 @@ async def health_check():
     try:
         async with async_session() as db:
             await db.execute(text("SELECT 1"))
-        checks["checks"]["database"] = {"status": "ok"}
+        db_type = "PostgreSQL" if "postgresql" in config.DATABASE_URL else "SQLite"
+        checks["checks"]["database"] = {"status": "ok", "type": db_type}
     except Exception as e:
         checks["status"] = "unhealthy"
         checks["checks"]["database"] = {"status": "error", "detail": str(e)}

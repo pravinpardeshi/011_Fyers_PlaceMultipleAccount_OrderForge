@@ -40,6 +40,7 @@ class Order(Base):
     stop_price: Mapped[float] = mapped_column(Float, default=0)
     validity: Mapped[str] = mapped_column(String(10), default="DAY")
     disclosed_qty: Mapped[int] = mapped_column(Integer, default=0)
+    stop_loss: Mapped[float] = mapped_column(Float, default=0)
     status: Mapped[str] = mapped_column(String(20), default="PENDING")
     response: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

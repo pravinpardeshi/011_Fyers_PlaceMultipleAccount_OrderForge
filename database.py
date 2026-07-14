@@ -43,3 +43,10 @@ async def init_db():
             await conn.execute(text("PRAGMA foreign_keys=ON"))
         from models import Account, Order  # noqa: F401
         await conn.run_sync(Base.metadata.create_all)
+
+        # Migration: add stop_loss column to orders table if missing
+        if _is_sqlite(config.DATABASE_URL):
+            result = await conn.execute(text("PRAGMA table_info(orders)"))
+            columns = [row[1] for row in result.fetchall()]
+            if "stop_loss" not in columns:
+                await conn.execute(text("ALTER TABLE orders ADD COLUMN stop_loss FLOAT DEFAULT 0"))

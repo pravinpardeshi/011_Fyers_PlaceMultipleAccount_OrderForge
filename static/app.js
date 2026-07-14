@@ -35,22 +35,49 @@ function toggleSidebar() {
     const next = getSidebarState() === 'expanded' ? 'collapsed' : 'expanded';
     localStorage.setItem('sidebar', next);
     applySidebar(next);
+    if (next === 'collapsed') {
+        document.querySelectorAll('.nav-parent').forEach(p => p.classList.remove('open'));
+    }
 }
 
 applySidebar(getSidebarState());
 
 // ─── Tab Navigation ───
-document.querySelectorAll('.nav-links li').forEach(tab => {
-    tab.addEventListener('click', () => {
+document.querySelectorAll('.nav-links li[data-tab]').forEach(tab => {
+    tab.addEventListener('click', (e) => {
         document.querySelectorAll('.nav-links li').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.nav-parent').forEach(p => p.classList.remove('open'));
         tab.classList.add('active');
         document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
 
         if (tab.dataset.tab === 'accounts') loadAccounts();
         if (tab.dataset.tab === 'tokens') loadTokenStatus();
         if (tab.dataset.tab === 'history') loadOrderHistory();
+        if (tab.dataset.tab === 'orderbook') loadOrderBook();
+        if (tab.dataset.tab === 'funds') loadFunds();
         if (tab.dataset.tab === 'health') loadHealthCheck();
+    });
+});
+
+document.querySelectorAll('.nav-parent').forEach(parent => {
+    parent.querySelector('.nav-arrow')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar.classList.contains('collapsed')) {
+            sidebar.classList.remove('collapsed');
+            localStorage.setItem('sidebar', 'expanded');
+        }
+        parent.classList.toggle('open');
+    });
+    parent.addEventListener('click', (e) => {
+        if (e.target.closest('.nav-submenu')) return;
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar.classList.contains('collapsed')) {
+            sidebar.classList.remove('collapsed');
+            localStorage.setItem('sidebar', 'expanded');
+        }
+        parent.classList.toggle('open');
     });
 });
 
@@ -163,16 +190,22 @@ async function placeOrder(side) {
     const orderType = parseInt(document.getElementById('orderType').value);
     const limitPrice = parseFloat(document.getElementById('limitPrice').value) || 0;
     const stopPrice = parseFloat(document.getElementById('stopPrice').value) || 0;
-    const validity = document.getElementById('validity').value;
+    const stopLoss = parseFloat(document.getElementById('stopLoss').value) || 0;
+    const validity = document.getElementById('validityAlways').value;
     const accountIds = getSelectedAccountIds();
 
     if (!symbol) { toast('Enter a symbol', 'error'); return; }
     if (!accountIds) { toast('Select at least one account', 'error'); return; }
 
-    const payload = { symbol, qty, order_type: orderType, side, product_type: productType, limit_price: limitPrice, stop_price: stopPrice, validity, account_ids: accountIds };
+    const payload = { symbol, qty, order_type: orderType, side, product_type: productType, limit_price: limitPrice, stop_price: stopPrice, stop_loss: stopLoss, validity, account_ids: accountIds };
 
     const sideLabel = side === 1 ? 'BUY' : 'SELL';
     const posType = isFO ? ` (${document.getElementById('positionType').value === 'CARRY_FORWARD' ? 'Carry Forward' : 'Intraday'})` : '';
+
+    // Show execution log panel
+    document.getElementById('executionLogCard').classList.remove('hidden');
+    document.getElementById('resizeDivider').classList.remove('hidden');
+
     logMessage(`Placing ${sideLabel} order: ${symbol} x ${qty}${posType}...`, 'pending');
 
     try {
@@ -329,7 +362,9 @@ async function loadTokenStatus() {
         container.innerHTML = statuses.map(s => {
             const isValid = s.has_token && s.is_valid;
             if (isValid) validCount++;
-            const expiryStr = s.token_expiry ? new Date(s.token_expiry).toLocaleString() : 'N/A';
+            const tzName = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const tzAbbr = new Date().toLocaleTimeString('en-US', { timeZoneName: 'short' }).split(' ')[2];
+            const expiryStr = s.token_expiry ? new Date(s.token_expiry).toLocaleString() + ' ' + tzAbbr + ' (' + tzName + ')' : 'N/A';
             return `
                 <div class="token-card">
                     <div class="token-card-header">
@@ -471,7 +506,7 @@ async function loadHealthCheck() {
             const checkClass = check.status === 'ok' ? 'health-ok' : 'health-error';
             let details = '';
             if (name === 'database') {
-                details = check.status === 'ok' ? 'Connection OK' : check.detail;
+                details = check.status === 'ok' ? `${check.type} - Connection OK` : check.detail;
             } else if (name === 'scheduler') {
                 details = `Check every ${check.check_interval_minutes} min`;
             } else if (name === 'accounts') {
@@ -510,6 +545,116 @@ async function loadHealthCheck() {
 
         container.innerHTML = html;
     } catch (err) {
+        toast(err.message, 'error');
+    }
+}
+
+// ─── Order Book ───
+async function loadOrderBook() {
+    const container = document.getElementById('orderBookContent');
+    container.innerHTML = '<div class="empty-state">Loading order book...</div>';
+
+    try {
+        const resp = await api('/api/v1/orders/book', 'POST', {});
+
+        if (!resp.accounts || resp.accounts.length === 0) {
+            container.innerHTML = '<div class="empty-state">No active accounts with tokens</div>';
+            return;
+        }
+
+        let html = '';
+        for (const acc of resp.accounts) {
+            html += `<div class="orderbook-account">`;
+            html += `<div class="orderbook-account-header"><strong>${esc(acc.account_name)}</strong></div>`;
+
+            if (acc.error) {
+                html += `<div class="orderbook-error">${esc(acc.error)}</div>`;
+            } else if (!acc.orders || acc.orders.length === 0) {
+                html += `<div class="empty-state">No orders found</div>`;
+            } else {
+                html += `<div class="table-container"><table class="data-table">
+                    <thead><tr>
+                        <th>Order ID</th><th>Symbol</th><th>Side</th><th>Qty</th>
+                        <th>Type</th><th>Price</th><th>Status</th><th>Time</th>
+                    </tr></thead><tbody>`;
+
+                for (const o of acc.orders) {
+                    const side = o.side === 1 ? 'BUY' : 'SELL';
+                    const sideClass = o.side === 1 ? 'side-buy' : 'side-sell';
+                    const typeLabel = {1:'Limit', 2:'Market', 3:'SL-Limit', 4:'SL-Market'}[o.orderType] || o.orderType;
+                    const price = o.orderType === 2 ? 'Market' : (o.limitPrice || 0);
+                    const time = o.orderDateTime ? new Date(o.orderDateTime).toLocaleString() : '-';
+                    const status = o.status || '-';
+                    html += `<tr>
+                        <td>${esc(String(o.orderNumber || '-'))}</td>
+                        <td>${esc(o.symbol || '-')}</td>
+                        <td><span class="${sideClass}">${side}</span></td>
+                        <td>${o.qty || '-'}</td>
+                        <td>${typeLabel}</td>
+                        <td>${price}</td>
+                        <td><span class="status-badge status-${status}">${status}</span></td>
+                        <td>${time}</td>
+                    </tr>`;
+                }
+                html += `</tbody></table></div>`;
+            }
+            html += `</div>`;
+        }
+
+        container.innerHTML = html;
+    } catch (err) {
+        container.innerHTML = `<div class="empty-state">Error: ${esc(err.message)}</div>`;
+        toast(err.message, 'error');
+    }
+}
+
+// ─── Funds ───
+async function loadFunds() {
+    const container = document.getElementById('fundsContent');
+    container.innerHTML = '<div class="empty-state">Loading funds...</div>';
+
+    try {
+        const resp = await api('/api/v1/accounts/funds', 'POST', {});
+
+        if (!resp.accounts || resp.accounts.length === 0) {
+            container.innerHTML = '<div class="empty-state">No active accounts with tokens</div>';
+            return;
+        }
+
+        let html = '<div class="funds-grid">';
+        for (const acc of resp.accounts) {
+            html += `<div class="funds-card">`;
+            html += `<div class="funds-card-header"><strong>${esc(acc.account_name)}</strong></div>`;
+
+            if (acc.error) {
+                html += `<div class="orderbook-error">${esc(acc.error)}</div>`;
+            } else if (Array.isArray(acc.funds) && acc.funds.length > 0) {
+                for (const item of acc.funds) {
+                    const title = item.title || item.name || item.id || 'Fund';
+                    const equity = item.equityAmount ?? 0;
+                    const commodity = item.commodityAmount ?? 0;
+                    const hasBoth = equity > 0 || commodity > 0;
+                    html += `<div class="funds-row"><span>${esc(title)}</span><span class="funds-value">₹${Number(equity).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>`;
+                    if (commodity > 0) {
+                        html += `<div class="funds-row funds-commodity"><span>${esc(title)} (Commodity)</span><span class="funds-value">₹${Number(commodity).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>`;
+                    }
+                }
+            } else if (acc.funds && typeof acc.funds === 'object') {
+                for (const [key, val] of Object.entries(acc.funds)) {
+                    if (typeof val === 'number') {
+                        html += `<div class="funds-row"><span>${esc(key)}</span><span class="funds-value">₹${Number(val).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>`;
+                    }
+                }
+            } else {
+                html += `<div class="empty-state">No fund data available</div>`;
+            }
+            html += `</div>`;
+        }
+        html += '</div>';
+
+        container.innerHTML = html;
+    } catch (err) {
+        container.innerHTML = `<div class="empty-state">Error: ${esc(err.message)}</div>`;
         toast(err.message, 'error');
     }
 }
@@ -594,13 +739,16 @@ function esc(str) {
 async function checkConnection() {
     const dot = document.getElementById('connectionStatus');
     const label = document.getElementById('connectionLabel');
+    const statusLeft = dot.parentElement;
     try {
         await api('/api/v1/accounts');
         dot.className = 'status-dot green';
         label.textContent = 'Server Connected';
+        statusLeft.classList.remove('disconnected');
     } catch {
         dot.className = 'status-dot red';
         label.textContent = 'Server Disconnected';
+        statusLeft.classList.add('disconnected');
     }
 }
 
@@ -611,6 +759,7 @@ async function init() {
     await checkConnection();
     try {
         const cfg = await api('/api/v1/config');
+        document.getElementById('databaseType').textContent = `DB: ${cfg.database_type}`;
         setInterval(checkConnection, cfg.connection_poll_interval_ms);
     } catch {
         setInterval(checkConnection, 10000);

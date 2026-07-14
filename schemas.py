@@ -63,6 +63,7 @@ class PlaceOrderRequest(BaseModel):
     stop_price: float = Field(default=0)
     validity: str = Field(default="DAY")
     disclosed_qty: int = Field(default=0)
+    stop_loss: float = Field(default=0)
     account_ids: list[uuid.UUID] | None = None  # None = all active accounts with tokens
 
 
@@ -89,8 +90,41 @@ class OrderHistoryItem(BaseModel):
     product_type: str
     limit_price: float
     stop_price: float
+    stop_loss: float
     status: str
     response: dict | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+# --- Order Book Schemas ---
+class OrderBookRequest(BaseModel):
+    account_ids: list[uuid.UUID] | None = None
+
+
+class OrderBookItem(BaseModel):
+    account_id: uuid.UUID
+    account_name: str
+    orders: list[dict]
+    error: str | None = None
+
+
+class OrderBookResponse(BaseModel):
+    accounts: list[OrderBookItem]
+
+
+# --- Funds Schemas ---
+class FundsRequest(BaseModel):
+    account_ids: list[uuid.UUID] | None = None
+
+
+class AccountFunds(BaseModel):
+    account_id: uuid.UUID
+    account_name: str
+    funds: dict | list | None = None
+    error: str | None = None
+
+
+class FundsResponse(BaseModel):
+    accounts: list[AccountFunds]

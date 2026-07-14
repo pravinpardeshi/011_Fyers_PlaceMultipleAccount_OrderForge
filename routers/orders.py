@@ -8,8 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db
 from models import Account, Order
-from schemas import PlaceOrderRequest, PlaceOrderResponse, OrderResult, OrderHistoryItem
-from fyers_client import place_single_order
+from schemas import PlaceOrderRequest, PlaceOrderResponse, OrderResult, OrderHistoryItem, OrderBookRequest, OrderBookResponse, OrderBookItem
+from fyers_client import place_single_order, get_order_book
 
 router = APIRouter(prefix="/api/v1/orders", tags=["orders"])
 
@@ -38,9 +38,10 @@ async def place_order(payload: PlaceOrderRequest, db: AsyncSession = Depends(get
         "validity": payload.validity,
         "disclosedQty": payload.disclosed_qty,
         "offlineOrder": False,
-        "stopLoss": 0,
-        "takeProfit": 0,
     }
+
+    if payload.stop_loss > 0:
+        order_data["stopLoss"] = payload.stop_loss
 
     loop = asyncio.get_running_loop()
     order_results = []
@@ -66,6 +67,7 @@ async def place_order(payload: PlaceOrderRequest, db: AsyncSession = Depends(get
             product_type=payload.product_type,
             limit_price=payload.limit_price,
             stop_price=payload.stop_price,
+            stop_loss=payload.stop_loss,
             validity=payload.validity,
             disclosed_qty=payload.disclosed_qty,
             status=status,
@@ -112,9 +114,49 @@ async def order_history(
             product_type=order.product_type,
             limit_price=order.limit_price,
             stop_price=order.stop_price,
+            stop_loss=order.stop_loss,
             status=order.status,
             response=order.response,
             created_at=order.created_at,
         ))
 
     return items
+
+
+@router.post("/book", response_model=OrderBookResponse)
+async def order_book(payload: OrderBookRequest, db: AsyncSession = Depends(get_db)):
+    query = select(Account).where(Account.is_active == True, Account.access_token.isnot(None))
+    if payload.account_ids:
+        query = query.where(Account.id.in_(payload.account_ids))
+    result = await db.execute(query)
+    accounts = result.scalars().all()
+
+    if not accounts:
+        raise HTTPException(status_code=400, detail="No active accounts with valid tokens. Generate tokens first.")
+
+    loop = asyncio.get_running_loop()
+    items = []
+
+    def _fetch_book(acc):
+        return acc, get_order_book(acc)
+
+    with ThreadPoolExecutor(max_workers=len(accounts)) as pool:
+        tasks = [loop.run_in_executor(pool, _fetch_book, acc) for acc in accounts]
+        completed = await asyncio.gather(*tasks)
+
+    for acc, resp in completed:
+        error = None
+        orders = []
+        if resp.get("s") == "ok":
+            orders = resp.get("orderBook", [])
+        else:
+            error = resp.get("message", str(resp))
+
+        items.append(OrderBookItem(
+            account_id=acc.id,
+            account_name=acc.name,
+            orders=orders,
+            error=error,
+        ))
+
+    return OrderBookResponse(accounts=items)
